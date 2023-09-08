@@ -10,17 +10,20 @@ import java.util.*;
 
 public class MoxfieldApi {
 
-    static String url = "https://api2.moxfield.com/v2/decks";
+    static String baseUrl = "https://api2.moxfield.com/v2/decks";
 
     public static JSONObject getDecklist(String deckId) {
-
         String endpoint = "/all/" + deckId;
-
         return doRequest(endpoint);
     }
 
     public static List<Deck> getDecksByFormat(String format) {
+        List<JSONArray> pageData = getAllPageData(format);
+        return parsePageData(pageData);
+    }
 
+
+    private static List<JSONArray> getAllPageData(String format) {
         List<JSONArray> pages = new ArrayList<JSONArray>();
 
         int pageCount = 1;
@@ -28,11 +31,10 @@ public class MoxfieldApi {
         JSONObject currentPage;
 
         while(pageCount <= totalPages) {
-            String endpoint = "/search?pageNumber=" + pageCount +
-                                "&pageSize=100&sortType=updated&sortDirection=Descending&fmt=" + format;
-            
+            String endpoint = "/search?pageNumber=" + pageCount + "&pageSize=100&sortType=updated&sortDirection=Descending&fmt=" + format;
             currentPage = doRequest(endpoint);
-            if (isValid(currentPage)) {
+
+            if (isPageValid(currentPage)) {
                 totalPages = (Integer) currentPage.get("totalPages");
                 pages.add((JSONArray) currentPage.get("data"));
                 pageCount++;
@@ -40,28 +42,27 @@ public class MoxfieldApi {
                 break;
             }
         }
-        return parsePages(pages);
+
+        return pages;
     }
 
-    private static boolean isValid(JSONObject currentPage) {
+    private static boolean isPageValid(JSONObject currentPage) {
         return ((JSONArray)((JSONObject) currentPage).get("data")).length() > 0;
     }
 
-    private static List<Deck> parsePages(List<JSONArray> pages) {
+    private static List<Deck> parsePageData(List<JSONArray> pages) {
         List<Deck> decks = new ArrayList<Deck>();
-
         for (JSONArray page : pages) {
             for (Object deck : page) {
-                if (isLegal(deck)) {
+                if (isDeckLegal(deck)) {
                     decks.add(new Deck((JSONObject) deck));
                 }
             }
         }
-
         return decks;
     }
 
-    private static boolean isLegal(Object deck) {
+    private static boolean isDeckLegal(Object deck) {
         return (Boolean) ((JSONObject) deck).get("isLegal") &&
         (Integer) ((JSONObject) deck).get("mainboardCount") == 50 &&
         (Integer) ((JSONObject) deck).get("sideboardCount") <= 10;
@@ -69,13 +70,11 @@ public class MoxfieldApi {
 
     private static JSONObject doRequest(String endpoint) {
         try {
-            return Unirest.get(url + endpoint).asJson().getBody().getObject();
+            return Unirest.get(baseUrl + endpoint).asJson().getBody().getObject();
         } catch (UnirestException e) {
             e.printStackTrace();
         }
-
         System.err.println("Something went wrong performing the request on this endpoint:\n" + endpoint);
-
         return new JSONObject();
     }
 }

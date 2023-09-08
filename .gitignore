@@ -1,2 +1,3 @@
 /.vscode
-/decks.json
+/*.json
+/.class
