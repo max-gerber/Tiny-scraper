@@ -6,8 +6,8 @@ public class Main {
 
     static boolean writeMetadata = true;
     static boolean performScrape = true;
-    static String commander;
-    static String partner;
+    static String commander = "Bruvac the Grandiloquent";
+    static String partner = null; //set to null if there is no partner
 
     public static void main(String[] args) {
         List<Deck> decks = new ArrayList<>();
@@ -21,9 +21,7 @@ public class Main {
 
         Stats decksStats = new Stats(decks);
         StatisticsWriter.writeStatisticsToFiles(decksStats);
-        Stats commanderStats = new Stats(decks, "Bruvac the Grandiloquent");
+        Stats commanderStats = new Stats(decks, commander, partner);
         StatisticsWriter.writeStatisticsToFiles(commanderStats);
-        // commanderStats = new Stats(decks, "Jeska, Thrice Reborn", "Yoshimaru, Ever Faithful");
-        // StatisticsWriter.writeStatisticsToFiles(commanderStats);
     }
 }

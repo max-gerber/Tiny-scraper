@@ -22,13 +22,6 @@ public class Stats {
         sortStatistics();
     }
 
-    public Stats (List<Deck> decks, String commander) {
-        mainboardCount = new HashMap<>();
-        sideboardCount = new HashMap<>();
-        populateStatistics(decks, commander, null);
-        sortStatistics();
-    }
-
     public Stats (List<Deck> decks, String commander, String partner) {
         mainboardCount = new HashMap<>();
         sideboardCount = new HashMap<>();
@@ -72,7 +65,7 @@ public class Stats {
     }
 
     private void populateStatistics(List<Deck> decks, String commander, String partner) {
-        if (partner != null) {
+        if (partner != null && partner != "") {
             commanders = commander + " + " + partner;
         } else {
             commanders = commander;
