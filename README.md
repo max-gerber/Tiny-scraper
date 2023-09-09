@@ -1,4 +1,4 @@
-# MoxfieldApi
+# Tiny Leaders deck scraper + analyser
 Not very user friendly atm, still a work in progress.
 
 To run with the ```decks.json``` already present (scraped 08 Sep 2023) set ```performScrape = false``` in ```Main.java```.
