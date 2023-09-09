@@ -28,55 +28,23 @@ public class Deck {
     public Deck(JSONObject metaData) {
         JSONObject deckInfo = MoxfieldApi.getDecklist((String) metaData.get("publicId"));
 
-        commanders = extractCommanders((JSONObject) deckInfo.get("commanders"));
-        hasPartner = commanders.size() == 2;
-        colourIdentity = extractColourIdentity((JSONArray) (metaData.get("colorIdentity")));
-        colourPercentages = extractColourPercentages((JSONObject) metaData.get("colorPercentages"));
-        mainboard = extractCards((JSONObject) deckInfo.get("mainboard"));
-        sideboard = extractCards((JSONObject) deckInfo.get("sideboard"));
-        if (hasCompanions(deckInfo)) {
-            companion = extractCompanion((JSONObject) deckInfo.get("companions"));
+        try {
+            commanders = DeckUtils.extractCommandersFromJson((JSONObject) deckInfo.get("commanders"));
+            hasPartner = commanders.size() == 2;
+            colourIdentity = DeckUtils.extractColourIdentityFromJson((JSONArray) (metaData.get("colorIdentity")));
+            colourPercentages = DeckUtils.extractColourPercentagesFromJson((JSONObject) metaData.get("colorPercentages"));
+            mainboard = DeckUtils.extractCardsFromJson((JSONObject) deckInfo.get("mainboard"));
+            sideboard = DeckUtils.extractCardsFromJson((JSONObject) deckInfo.get("sideboard"));
+            if (hasCompanions(deckInfo)) {
+                companion = DeckUtils.extractCompanionFromJson((JSONObject) deckInfo.get("companions"));
+            }
+        } catch (Exception e) {
+            System.err.println("There was an error adding a deck: "+ deckInfo.toString(2) +"\n\n" + e);
         }
     }
 
     private boolean hasCompanions(JSONObject deckInfo) {
         return (Integer) deckInfo.get("companionsCount") != 0;
-    }
-
-    private List<String> extractCards(JSONObject cardsJson) {
-        List<String> cards = new ArrayList<>();
-        Iterator<String> keys = cardsJson.keys();
-        while(keys.hasNext()) {
-            cards.add(keys.next());
-        }
-        return cards;
-    }
-
-    private Map<String, Float> extractColourPercentages(JSONObject colourPercentagesJson) {
-        Map<String, Float> colourPercentages = new HashMap<>();
-        Iterator<String> keys = colourPercentagesJson.keys();
-        while(keys.hasNext()) {
-            String key = keys.next();
-            Float value = Float.parseFloat(colourPercentagesJson.get(key).toString());
-            colourPercentages.put(key, value);
-        }
-        return colourPercentages;
-    }
-
-    private String extractCompanion(JSONObject companions) {
-        return (String) (companions.keySet()).toArray()[0];
-    }
-
-    private List<String> extractCommanders(JSONObject commanders) {
-        return new ArrayList<String>(commanders.keySet());
-    }
-
-    private List<String> extractColourIdentity(JSONArray jsonColourIdentity) {
-        List<String> colourIdentity = new ArrayList<String>();
-        for (Object colour : jsonColourIdentity) {
-            colourIdentity.add((String) colour);
-        }
-        return colourIdentity;
     }
 
     public List<String> getCommanders() {
